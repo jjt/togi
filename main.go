@@ -51,7 +51,10 @@ type modelsResponse struct {
 
 const modelID = "handy-deterministic"
 
-var logger *slog.Logger
+var (
+	logger    *slog.Logger
+	configMgr *ConfigWatcher
+)
 
 func handleChatCompletions(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -80,8 +83,14 @@ func handleChatCompletions(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	logger.Info("input", "text", raw)
-	out := Process(raw)
-	logger.Info("output", "text", out, "changed", raw != out)
+	cfg, cerr := configMgr.Get()
+	var out string
+	if cerr != nil {
+		out = "error in config file"
+	} else {
+		out = Process(raw, cfg)
+	}
+	logger.Info("output", "text", out, "changed", raw != out, "config_err", cerr != nil)
 
 	model := req.Model
 	if model == "" {
@@ -165,6 +174,7 @@ func (s *statusWriter) WriteHeader(code int) {
 func main() {
 	addr := flag.String("addr", ":8089", "listen address")
 	logLevel := flag.String("log-level", "debug", "log level: debug|info|warn|error")
+	configFlag := flag.String("config", "", "path to config.toml (overrides LOWR_CONFIG and XDG default)")
 	flag.Parse()
 
 	level, err := parseLevel(*logLevel)
@@ -173,6 +183,15 @@ func main() {
 		os.Exit(2)
 	}
 	logger = slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: level}))
+
+	cfgPath := *configFlag
+	if cfgPath == "" {
+		cfgPath = ConfigPath()
+	}
+	configMgr = NewConfigWatcher(cfgPath, logger)
+	if _, cerr := configMgr.Get(); cerr != nil {
+		logger.Error("initial config load (will keep retrying per-request)", "err", cerr)
+	}
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/v1/chat/completions", handleChatCompletions)

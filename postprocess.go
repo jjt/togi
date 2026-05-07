@@ -8,8 +8,12 @@ import (
 
 var wordRe = regexp.MustCompile(`\p{L}+(?:'\p{L}+)?`)
 
-func Process(text string) string {
+func Process(text string, cfg *Config) string {
 	text = lowercasePreserveAcronyms(text)
+	if cfg != nil {
+		text = applySurrounds(text, cfg.Surrounds)
+		text = applyReplacements(text, cfg.Replacements)
+	}
 	text = stripTrailingPeriodIfSingleSentence(text)
 	return text
 }
