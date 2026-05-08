@@ -14,8 +14,8 @@ import (
 )
 
 type Config struct {
-	Replacements map[string]string `toml:"replacements"`
-	Surrounds    []Surround        `toml:"surrounds"`
+	Replacements map[string]string   `toml:"replacements"`
+	Surrounds    map[string]Surround `toml:"surrounds"`
 }
 
 type Surround struct {
@@ -94,8 +94,15 @@ func (w *ConfigWatcher) Get() (*Config, error) {
 		for _, k := range sortedKeys(cfg.Replacements) {
 			w.logger.Info("config.replacement", "from", k, "to", cfg.Replacements[k])
 		}
-		for _, s := range cfg.Surrounds {
+		surroundNames := make([]string, 0, len(cfg.Surrounds))
+		for k := range cfg.Surrounds {
+			surroundNames = append(surroundNames, k)
+		}
+		sort.Strings(surroundNames)
+		for _, name := range surroundNames {
+			s := cfg.Surrounds[name]
 			w.logger.Info("config.surround",
+				"name", name,
 				"start", s.Start,
 				"end", s.End,
 				"open", s.Open,
@@ -142,8 +149,14 @@ func phraseBody(phrase string) string {
 	return strings.Join(parts, `\s+`)
 }
 
-func applySurrounds(s string, surrounds []Surround) string {
-	for _, sr := range surrounds {
+func applySurrounds(s string, surrounds map[string]Surround) string {
+	names := make([]string, 0, len(surrounds))
+	for k := range surrounds {
+		names = append(names, k)
+	}
+	sort.Strings(names)
+	for _, name := range names {
+		sr := surrounds[name]
 		if sr.Start == "" || sr.End == "" {
 			continue
 		}

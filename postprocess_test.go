@@ -61,9 +61,9 @@ func TestProcessWithReplacements(t *testing.T) {
 
 func TestProcessWithSurrounds(t *testing.T) {
 	cfg := &Config{
-		Surrounds: []Surround{
-			{Start: "parent", End: "unparent", Open: "(", Close: ")"},
-			{Start: "quote", End: "end quote", Open: "\"", Close: "\""},
+		Surrounds: map[string]Surround{
+			"parens": {Start: "parent", End: "unparent", Open: "(", Close: ")"},
+			"quotes": {Start: "quote", End: "end quote", Open: "\"", Close: "\""},
 		},
 	}
 	cases := []struct {
@@ -87,8 +87,8 @@ func TestProcessWithSurrounds(t *testing.T) {
 
 func TestProcessSurroundStrip(t *testing.T) {
 	cfg := &Config{
-		Surrounds: []Surround{
-			{Start: "parent", End: "unparent", Open: "(", Close: ")", Strip: true},
+		Surrounds: map[string]Surround{
+			"parens": {Start: "parent", End: "unparent", Open: "(", Close: ")", Strip: true},
 		},
 	}
 	cases := []struct {

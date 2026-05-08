@@ -41,13 +41,13 @@ func TestLoadConfigParses(t *testing.T) {
 javascript = "JavaScript"
 "vs code" = "VS Code"
 
-[[surrounds]]
+[surrounds.parens]
 start = "parent"
 end = "unparent"
 open = "("
 close = ")"
 
-[[surrounds]]
+[surrounds.quotes]
 start = "quote"
 end = "end quote"
 open = '"'
@@ -72,7 +72,7 @@ close = '"'
 	if len(c.Surrounds) != 2 {
 		t.Fatalf("want 2 surrounds, got %d", len(c.Surrounds))
 	}
-	if c.Surrounds[0].Open != "(" || c.Surrounds[1].Open != "\"" {
+	if c.Surrounds["parens"].Open != "(" || c.Surrounds["quotes"].Open != "\"" {
 		t.Errorf("surrounds parsed wrong: %+v", c.Surrounds)
 	}
 }
