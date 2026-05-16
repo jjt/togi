@@ -1,4 +1,4 @@
-module lowr/handy-postprocess
+module togi
 
 go 1.22
 

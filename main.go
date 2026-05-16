@@ -174,7 +174,7 @@ func (s *statusWriter) WriteHeader(code int) {
 func main() {
 	addr := flag.String("addr", ":8089", "listen address")
 	logLevel := flag.String("log-level", "debug", "log level: debug|info|warn|error")
-	configFlag := flag.String("config", "", "path to config.toml (overrides LOWR_CONFIG and XDG default)")
+	configFlag := flag.String("config", "", "path to config.toml (overrides TOGI_CONFIG and XDG default)")
 	flag.Parse()
 
 	level, err := parseLevel(*logLevel)

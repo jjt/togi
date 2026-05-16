@@ -7,14 +7,14 @@ import (
 )
 
 func TestConfigPathPrecedence(t *testing.T) {
-	t.Setenv("LOWR_CONFIG", "/tmp/explicit.toml")
+	t.Setenv("TOGI_CONFIG", "/tmp/explicit.toml")
 	t.Setenv("XDG_CONFIG_HOME", "/tmp/xdg")
 	if got := ConfigPath(); got != "/tmp/explicit.toml" {
-		t.Fatalf("LOWR_CONFIG should win, got %q", got)
+		t.Fatalf("TOGI_CONFIG should win, got %q", got)
 	}
 
-	t.Setenv("LOWR_CONFIG", "")
-	want := filepath.Join("/tmp/xdg", "handy-lowr", "config.toml")
+	t.Setenv("TOGI_CONFIG", "")
+	want := filepath.Join("/tmp/xdg", "togi", "config.toml")
 	if got := ConfigPath(); got != want {
 		t.Fatalf("XDG path: got %q, want %q", got, want)
 	}

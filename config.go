@@ -27,7 +27,7 @@ type Surround struct {
 }
 
 func ConfigPath() string {
-	if p := os.Getenv("LOWR_CONFIG"); p != "" {
+	if p := os.Getenv("TOGI_CONFIG"); p != "" {
 		return p
 	}
 	base := os.Getenv("XDG_CONFIG_HOME")
@@ -38,7 +38,7 @@ func ConfigPath() string {
 		}
 		base = filepath.Join(home, ".config")
 	}
-	return filepath.Join(base, "handy-lowr", "config.toml")
+	return filepath.Join(base, "togi", "config.toml")
 }
 
 type ConfigWatcher struct {
