@@ -1,0 +1,53 @@
+[env]
+TOGI_BIN = "{{env.HOME}}/.local/bin/togi"
+TOGI_PLIST = "{{env.HOME}}/Library/LaunchAgents/computer.handy.togi.plist"
+TOGI_LABEL = "computer.handy.togi"
+TOGI_OUT_LOG = "{{env.HOME}}/Library/Logs/togi.out.log"
+TOGI_ERR_LOG = "{{env.HOME}}/Library/Logs/togi.err.log"
+
+[tasks.build]
+description = "Build togi binary into ~/.local/bin"
+run = "go build -o $TOGI_BIN ."
+
+[tasks.install]
+description = "Build and (re)load the LaunchAgent"
+depends = ["build"]
+run = """
+set -e
+launchctl bootout gui/$(id -u)/$TOGI_LABEL 2>/dev/null || true
+launchctl bootstrap gui/$(id -u) $TOGI_PLIST
+launchctl print gui/$(id -u)/$TOGI_LABEL | grep -E 'state|path' | head -3
+"""
+
+[tasks.run]
+description = "Run togi in foreground (no LaunchAgent)"
+run = "$TOGI_BIN -config $XDG_CONFIG_HOME/togi/config.toml"
+
+[tasks.start]
+description = "launchctl bootstrap (load + start)"
+run = "launchctl bootstrap gui/$(id -u) $TOGI_PLIST"
+
+[tasks.stop]
+description = "launchctl bootout (stop + unload)"
+run = "launchctl bootout gui/$(id -u)/$TOGI_LABEL"
+
+[tasks.restart]
+description = "launchctl kickstart -k (restart running service)"
+depends = ["build"]
+run = "launchctl kickstart -k gui/$(id -u)/$TOGI_LABEL"
+
+[tasks.status]
+description = "Show LaunchAgent status"
+run = "launchctl print gui/$(id -u)/$TOGI_LABEL"
+
+[tasks.logs]
+description = "Tail stdout log"
+run = "tail -f $TOGI_OUT_LOG"
+
+[tasks.logs-err]
+description = "Tail stderr log"
+run = "tail -f $TOGI_ERR_LOG"
+
+[tasks.logs-all]
+description = "Tail both logs"
+run = "tail -f $TOGI_OUT_LOG $TOGI_ERR_LOG"
